@@ -1850,8 +1850,10 @@ async function processPrompt(
       await message.reply(errorDetail).catch(() => {});
     }
 
-    // エラー後にエージェントへ自動フォローアップ（サーキットブレーカー時は除く）
-    if (!errorMsg.includes('Circuit breaker')) {
+    // エラー後にエージェントへ自動フォローアップ（タイムアウト・サーキットブレーカー時は除く）
+    // タイムアウト時のフォローアップは壊れたセッションにさらに負荷をかけるだけで、
+    // 再びタイムアウト→Circuit breaker発動→チャンネルが長時間ロックされる原因になる
+    if (!errorMsg.includes('Circuit breaker') && !errorMsg.includes('timed out')) {
       try {
         console.log('[xangi] Sending error follow-up to agent');
         const sessionId = getSession(channelId);

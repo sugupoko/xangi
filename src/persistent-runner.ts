@@ -1,7 +1,7 @@
 import { spawn, ChildProcess } from 'child_process';
 import { EventEmitter } from 'events';
 import type { RunOptions, RunResult, StreamCallbacks, AgentRunner } from './agent-runner.js';
-import { mergeTexts } from './agent-runner.js';
+import { mergeTexts, sanitizeSurrogates } from './agent-runner.js';
 import { DEFAULT_TIMEOUT_MS } from './constants.js';
 import { buildPersistentSystemPrompt } from './base-runner.js';
 
@@ -276,7 +276,7 @@ export class PersistentRunner extends EventEmitter implements AgentRunner {
       type: 'user',
       message: {
         role: 'user',
-        content: this.currentItem.prompt,
+        content: sanitizeSurrogates(this.currentItem.prompt),
       },
     };
 

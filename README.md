@@ -20,7 +20,7 @@ Claude Code / Codex / Gemini CLI をバックエンドに、Discord から利用
 
 ![Architecture](docs/images/architecture.png)
 
-## Quick Start（Docker）
+## Quick Start
 
 ### 1. 環境変数設定
 
@@ -41,23 +41,36 @@ DISCORD_ALLOWED_USER=123456789012345678
 
 > 💡 Discord Bot の作成方法・IDの調べ方は [Discord セットアップ](docs/discord-setup.md) を参照
 
-### 2. 起動
+### 2. ビルド・起動
 
 ```bash
-docker compose up xangi -d --build
+# Node.js 22+ と使用するAI CLIが必要
+# Claude Code: curl -fsSL https://claude.ai/install.sh | bash
+# Codex CLI:   npm install -g @openai/codex
+# Gemini CLI:  npm install -g @google/gemini-cli
+
+npm install
+npm run build
+npm start
+
+# 開発時
+npm run dev
 ```
 
-### 3. Claude Code 認証
-
-```bash
-docker exec -it xangi claude
-```
-
-表示されたURLをブラウザで開いて認証してください。
-
-### 4. 動作確認
+### 3. 動作確認
 
 Discord で bot にメンションして話しかけてください。
+
+### 自動再起動（pm2）
+
+xangi は `/restart` コマンドで再起動できます。自動復帰にはプロセスマネージャが必要です。
+
+```bash
+npm install -g pm2
+pm2 start "npm start" --name xangi
+pm2 restart xangi  # 手動再起動
+pm2 logs xangi     # ログ確認
+```
 
 ## 使い方
 
@@ -77,34 +90,17 @@ Discord で bot にメンションして話しかけてください。
 
 詳細は [使い方ガイド](docs/usage.md) を参照してください。
 
-## ローカル実行
+## Docker で実行する場合
 
-Docker を使わずにホストで直接実行する方法。
+コンテナ隔離環境で実行したい場合は Docker も利用できます。
 
 ```bash
-# Node.js 22+ と使用するAI CLIが必要
-# Claude Code: curl -fsSL https://claude.ai/install.sh | bash
-# Codex CLI:   npm install -g @openai/codex
-# Gemini CLI:  npm install -g @google/gemini-cli
-
-npm install
-npm run build
-npm start
-
-# 開発時
-npm run dev
+docker compose up xangi -d --build
 ```
 
-### 自動再起動
-
-xangi は `/restart` コマンドで再起動できます。自動復帰にはプロセスマネージャが必要です。
-
+Claude Code 認証:
 ```bash
-# pm2 を使う場合
-npm install -g pm2
-pm2 start "npm start" --name xangi
-pm2 restart xangi  # 手動再起動
-pm2 logs xangi     # ログ確認
+docker exec -it xangi claude
 ```
 
 ## 環境変数

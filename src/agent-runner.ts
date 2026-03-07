@@ -78,6 +78,14 @@ export function mergeTexts(streamed: string, result: string): string {
   return `${streamed}\n${result}`;
 }
 
+/** 不正なサロゲートペア（片方だけの孤立サロゲート）を除去する */
+export function sanitizeSurrogates(text: string): string {
+  return text.replace(
+    /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g,
+    ''
+  );
+}
+
 /**
  * バックエンド名を表示用に変換
  */

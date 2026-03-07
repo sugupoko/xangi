@@ -1,7 +1,7 @@
 import { spawn } from 'child_process';
 import { processManager } from './process-manager.js';
 import type { RunOptions, RunResult, StreamCallbacks } from './agent-runner.js';
-import { mergeTexts } from './agent-runner.js';
+import { mergeTexts, sanitizeSurrogates } from './agent-runner.js';
 import { DEFAULT_TIMEOUT_MS } from './constants.js';
 import { buildSystemPrompt } from './base-runner.js';
 
@@ -40,7 +40,8 @@ export class ClaudeCodeRunner {
     this.systemPrompt = buildSystemPrompt();
   }
 
-  async run(prompt: string, options?: RunOptions): Promise<RunResult> {
+  async run(rawPrompt: string, options?: RunOptions): Promise<RunResult> {
+    const prompt = sanitizeSurrogates(rawPrompt);
     const args: string[] = ['-p', '--output-format', 'json'];
 
     const skip = options?.skipPermissions ?? this.skipPermissions;
@@ -143,10 +144,11 @@ export class ClaudeCodeRunner {
    * ストリーミング実行
    */
   async runStream(
-    prompt: string,
+    rawPrompt: string,
     callbacks: StreamCallbacks,
     options?: RunOptions
   ): Promise<RunResult> {
+    const prompt = sanitizeSurrogates(rawPrompt);
     const args: string[] = ['-p', '--output-format', 'stream-json', '--verbose'];
 
     const skip = options?.skipPermissions ?? this.skipPermissions;
