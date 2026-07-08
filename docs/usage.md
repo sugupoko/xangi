@@ -1447,6 +1447,20 @@ Agy が成功終了しても stdout が空の場合、stderr に出力された 
 | `SLACK_REPLY_SUGGESTIONS`          | 本人だけに候補を展開する `返信候補` ボタンを表示                                   | `false` |
 | `SLACK_REPLY_SUGGESTIONS_COUNT`    | 返信候補数（1〜5）                                                                 | `3`     |
 
+### Mattermost
+
+`MATTERMOST_SERVER_URL` と `MATTERMOST_BOT_TOKEN` の両方が揃うと有効化されます。詳細は [Mattermost セットアップ](mattermost-setup.md) を参照。
+
+| 変数                             | 説明                                                       | デフォルト          |
+| -------------------------------- | ---------------------------------------------------------- | ------------------- |
+| `MATTERMOST_SERVER_URL`          | MattermostサーバのURL（末尾スラッシュ不要）                | -                   |
+| `MATTERMOST_BOT_TOKEN`           | Bot Account のアクセストークン                             | -                   |
+| `MATTERMOST_ALLOWED_USER`        | 許可ユーザーID（カンマ区切り、`*`で全員許可）              | -                   |
+| `MATTERMOST_AUTO_REPLY_CHANNELS` | メンションなしで応答するチャンネルID（カンマ区切り）        | （なし）            |
+| `MATTERMOST_STREAMING`           | 応答を逐次編集で表示するか                                 | `true`              |
+| `MATTERMOST_SHOW_THINKING`       | 「考え中...」を先に表示してから編集するか                  | `true`              |
+| `MATTERMOST_RESET_TEXT_PATTERNS` | セッションリセットのテキストコマンド（カンマ区切り）        | `/reset,/new,/clear` |
+
 ## 複数インスタンスの運用
 
 Gitなしmanaged版は、現在1つのOS userにつき1 instanceです。同じuserでinstallerを再実行すると既存instanceの更新・再設定になり、2個目は作りません。別のPCまたは別OS userならhome directory、config、state、workspace、serviceが分離されるため、それぞれ通常のinstall commandを実行できます。同一OS user内のnamed managed instanceは未対応です。
