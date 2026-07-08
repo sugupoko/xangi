@@ -1459,7 +1459,7 @@ Agy が成功終了しても stdout が空の場合、stderr に出力された 
 | `MATTERMOST_AUTO_REPLY_CHANNELS` | メンションなしで応答するチャンネルID（カンマ区切り）        | （なし）            |
 | `MATTERMOST_STREAMING`           | 応答を逐次編集で表示するか                                 | `true`              |
 | `MATTERMOST_SHOW_THINKING`       | 「考え中...」を先に表示してから編集するか                  | `true`              |
-| `MATTERMOST_RESET_TEXT_PATTERNS` | セッションリセットのテキストコマンド（カンマ区切り）        | `/reset,/new,/clear` |
+| `MATTERMOST_RESET_TEXT_PATTERNS` | セッションリセットのテキストコマンド（カンマ区切り。Mattermostは`/`始まりを横取りするため非スラッシュ語） | `リセット,reset,clear,newchat` |
 
 ## 複数インスタンスの運用
 

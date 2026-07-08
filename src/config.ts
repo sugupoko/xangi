@@ -519,11 +519,13 @@ export function loadConfig(): Config {
         : [],
       streaming: process.env.MATTERMOST_STREAMING !== 'false',
       showThinking: process.env.MATTERMOST_SHOW_THINKING !== 'false',
+      // Mattermost は "/" 始まりを自前のスラッシュコマンドとして横取りし、
+      // 未登録だと Bot に post が届かない。そのためリセットは非スラッシュ語を既定にする。
       resetTextPatterns: process.env.MATTERMOST_RESET_TEXT_PATTERNS
         ? process.env.MATTERMOST_RESET_TEXT_PATTERNS.split(',')
             .map((s) => s.trim())
             .filter(Boolean)
-        : ['/reset', '/new', '/clear'],
+        : ['リセット', 'reset', 'clear', 'newchat'],
     },
     agent: {
       backend,
