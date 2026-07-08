@@ -15,6 +15,7 @@ import { config as dotenvConfig } from 'dotenv';
 import { startWebChat } from './web-chat.js';
 import { startLineBot } from './line.js';
 import { formatTelegramError, startTelegramBot } from './telegram.js';
+import { startMattermostBot } from './mattermost.js';
 import { getEventsConfig } from './events-emitter.js';
 import { startInterInstanceChat, getInterChatConfig } from './inter-instance-chat/index.js';
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
@@ -80,6 +81,7 @@ async function main() {
   const slackAllowed = config.slack.allowedUsers || [];
   const lineAllowed = config.line.allowedUsers || [];
   const telegramAllowed = config.telegram.allowedUsers || [];
+  const mattermostAllowed = config.mattermost.allowedUsers || [];
 
   if (config.discord.enabled && discordAllowed.length === 0) {
     console.error('[xangi] Error: DISCORD_ALLOWED_USER must be set (use "*" to allow everyone)');
@@ -95,6 +97,10 @@ async function main() {
   }
   if (config.telegram.enabled && telegramAllowed.length === 0) {
     console.error('[xangi] Error: TELEGRAM_ALLOWED_USER must be set (use "*" to allow everyone)');
+    process.exit(1);
+  }
+  if (config.mattermost.enabled && mattermostAllowed.length === 0) {
+    console.error('[xangi] Error: MATTERMOST_ALLOWED_USER must be set (use "*" to allow everyone)');
     process.exit(1);
   }
 
@@ -119,6 +125,11 @@ async function main() {
     console.log('[xangi] Telegram: All users are allowed');
   } else if (telegramAllowed.length > 0) {
     console.log(`[xangi] Telegram: Allowed users: ${telegramAllowed.join(', ')}`);
+  }
+  if (mattermostAllowed.includes('*')) {
+    console.log('[xangi] Mattermost: All users are allowed');
+  } else if (mattermostAllowed.length > 0) {
+    console.log(`[xangi] Mattermost: Allowed users: ${mattermostAllowed.join(', ')}`);
   }
 
   // バックエンドリゾルバー & 動的ランナーマネージャーを作成
@@ -205,6 +216,17 @@ async function main() {
       scheduler,
     }).catch((err) => {
       console.error(`[xangi] Failed to start Telegram bot: ${formatTelegramError(err)}`);
+    });
+  }
+
+  // Mattermost Bot 起動。WebSocket 接続失敗は起動を止めず、他媒体の起動を妨げない。
+  if (config.mattermost.enabled) {
+    void startMattermostBot({
+      config,
+      agentRunner,
+      scheduler,
+    }).catch((err) => {
+      console.error(`[xangi] Failed to start Mattermost bot: ${err instanceof Error ? err.message : err}`);
     });
   }
 
@@ -376,10 +398,11 @@ async function main() {
     !config.slack.enabled &&
     !webChatEnabled &&
     !config.line.enabled &&
-    !config.telegram.enabled
+    !config.telegram.enabled &&
+    !config.mattermost.enabled
   ) {
     console.error(
-      '[xangi] No chat platform enabled. Set DISCORD_TOKEN, SLACK_BOT_TOKEN/SLACK_APP_TOKEN, WEB_CHAT_ENABLED=true, LINE_CHANNEL_ACCESS_TOKEN+LINE_CHANNEL_SECRET, or TELEGRAM_BOT_TOKEN'
+      '[xangi] No chat platform enabled. Set DISCORD_TOKEN, SLACK_BOT_TOKEN/SLACK_APP_TOKEN, WEB_CHAT_ENABLED=true, LINE_CHANNEL_ACCESS_TOKEN+LINE_CHANNEL_SECRET, TELEGRAM_BOT_TOKEN, or MATTERMOST_SERVER_URL+MATTERMOST_BOT_TOKEN'
     );
     process.exit(1);
   }

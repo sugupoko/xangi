@@ -6,6 +6,7 @@ const LABELS: Record<string, string> = {
   web: 'Webブラウザ',
   line: 'チャットプラットフォーム（LINE）',
   telegram: 'チャットプラットフォーム（Telegram）',
+  mattermost: 'チャットプラットフォーム（Mattermost）',
 };
 
 export function getPlatformLabel(platform?: ChatPlatform): string {

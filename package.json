@@ -43,6 +43,7 @@
   "license": "MIT",
   "dependencies": {
     "@line/bot-sdk": "^11.2.0",
+    "@mattermost/client": "^11.8.0",
     "@octokit/auth-app": "^8.2.0",
     "@slack/bolt": "^4.7.3",
     "discord.js": "^14.27.0",

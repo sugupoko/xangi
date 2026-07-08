@@ -8,11 +8,11 @@
 
 > **A**GENTIC **N**EON **G**ENESIS **I**NTELLIGENCE
 
-Claude Code / Codex / Cursor CLI / Grok CLI / Antigravity CLI / Local LLMをバックエンドに、Discord / Slack / Telegram / ブラウザ / LINE から利用できる AI アシスタント。Discord 推奨、ブラウザ単独でも動作可。
+Claude Code / Codex / Cursor CLI / Grok CLI / Antigravity CLI / Local LLMをバックエンドに、Discord / Slack / Telegram / Mattermost / ブラウザ / LINE から利用できる AI アシスタント。Discord 推奨、ブラウザ単独でも動作可。
 
 ## Features
 
-- Discord / Slack / Telegram / Web Chat UI / LINE 対応
+- Discord / Slack / Telegram / Mattermost / Web Chat UI / LINE 対応
 - Claude Code / Codex / Cursor CLI / Grok CLI / Antigravity CLI / Local LLM 対応
 - `/backend` でチャンネルごとに backend / model / effort を切り替え
 - スキル、スケジューラー、イベントトリガー
@@ -341,6 +341,7 @@ xangi を使ったAIアシスタント構築のノウハウをまとめた書籍
 - [Discord セットアップ](docs/discord-setup.md) - Bot作成・ID確認方法
 - [Slack セットアップ](docs/slack-setup.md) - Slack連携
 - [Telegram セットアップ](docs/telegram-setup.md) - Telegram Bot連携
+- [Mattermost セットアップ](docs/mattermost-setup.md) - Mattermost Bot連携（Bot作成・トークン・User ID確認）
 - [LINE セットアップ](docs/line-setup.md) - LINE Messaging API 連携 (Tailscale Funnel での外部公開含む)
 - [設計ドキュメント](docs/design.md) - アーキテクチャ・設計思想・データフロー
 - [外部イベントストリーム](docs/events.md) - 応答ライフサイクルのイベント配信仕様

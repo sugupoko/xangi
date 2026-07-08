@@ -184,6 +184,16 @@ export interface Config {
     mediaAllowedMimeTypes?: string[];
     mediaGroupDebounceMs?: number;
   };
+  mattermost: {
+    enabled: boolean;
+    serverUrl?: string;
+    botToken?: string;
+    allowedUsers?: string[];
+    autoReplyChannels?: string[];
+    streaming?: boolean;
+    showThinking?: boolean;
+    resetTextPatterns?: string[];
+  };
   agent: {
     backend: AgentBackend;
     config: AgentConfig;
@@ -215,11 +225,22 @@ export function loadConfig(): Config {
   const telegramBotToken = process.env.TELEGRAM_BOT_TOKEN;
   const telegramEnabled = !!telegramBotToken;
 
-  // 少なくともどれかが有効である必要がある（WebChat / LINE / Telegram 単独運用も可）
+  const mattermostServerUrl = process.env.MATTERMOST_SERVER_URL;
+  const mattermostBotToken = process.env.MATTERMOST_BOT_TOKEN;
+  const mattermostEnabled = !!mattermostServerUrl && !!mattermostBotToken;
+
+  // 少なくともどれかが有効である必要がある（WebChat / LINE / Telegram / Mattermost 単独運用も可）
   const webChatEnabled = process.env.WEB_CHAT_ENABLED === 'true';
-  if (!discordToken && !slackBotToken && !webChatEnabled && !lineEnabled && !telegramBotToken) {
+  if (
+    !discordToken &&
+    !slackBotToken &&
+    !webChatEnabled &&
+    !lineEnabled &&
+    !telegramBotToken &&
+    !mattermostEnabled
+  ) {
     throw new Error(
-      'DISCORD_TOKEN, SLACK_BOT_TOKEN, LINE_CHANNEL_ACCESS_TOKEN+LINE_CHANNEL_SECRET, TELEGRAM_BOT_TOKEN, or WEB_CHAT_ENABLED=true environment variable is required'
+      'DISCORD_TOKEN, SLACK_BOT_TOKEN, LINE_CHANNEL_ACCESS_TOKEN+LINE_CHANNEL_SECRET, TELEGRAM_BOT_TOKEN, MATTERMOST_SERVER_URL+MATTERMOST_BOT_TOKEN, or WEB_CHAT_ENABLED=true environment variable is required'
     );
   }
 
@@ -251,6 +272,13 @@ export function loadConfig(): Config {
         .map((s) => s.trim())
         .filter(Boolean)
     : [];
+  const mattermostAllowedUser = process.env.MATTERMOST_ALLOWED_USER;
+  const mattermostAllowedUsers = mattermostAllowedUser
+    ? mattermostAllowedUser
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean)
+    : [];
 
   const backend = (process.env.AGENT_BACKEND || 'claude-code') as AgentBackend;
   if (
@@ -278,6 +306,7 @@ export function loadConfig(): Config {
     slackEnabled && 'slack',
     lineEnabled && 'line',
     telegramEnabled && 'telegram',
+    mattermostEnabled && 'mattermost',
   ].filter(Boolean) as ChatPlatform[];
   if (enabledPlatforms.length === 1) {
     platform = enabledPlatforms[0];
@@ -474,6 +503,24 @@ export function loadConfig(): Config {
       }),
       resetTextPatterns: process.env.TELEGRAM_RESET_TEXT_PATTERNS
         ? process.env.TELEGRAM_RESET_TEXT_PATTERNS.split(',')
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : ['/reset', '/new', '/clear'],
+    },
+    mattermost: {
+      enabled: mattermostEnabled,
+      serverUrl: mattermostServerUrl,
+      botToken: mattermostBotToken,
+      allowedUsers: mattermostAllowedUsers,
+      autoReplyChannels: process.env.MATTERMOST_AUTO_REPLY_CHANNELS
+        ? process.env.MATTERMOST_AUTO_REPLY_CHANNELS.split(',')
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : [],
+      streaming: process.env.MATTERMOST_STREAMING !== 'false',
+      showThinking: process.env.MATTERMOST_SHOW_THINKING !== 'false',
+      resetTextPatterns: process.env.MATTERMOST_RESET_TEXT_PATTERNS
+        ? process.env.MATTERMOST_RESET_TEXT_PATTERNS.split(',')
             .map((s) => s.trim())
             .filter(Boolean)
         : ['/reset', '/new', '/clear'],
