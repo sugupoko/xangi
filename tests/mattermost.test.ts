@@ -23,8 +23,28 @@ describe('toWebsocketUrl', () => {
 });
 
 describe('mattermostContextKey', () => {
-  it('keys by channel id', () => {
+  it('keys by channel id when no options given (backward compatible)', () => {
     expect(mattermostContextKey('abc123')).toBe('mattermost:channel:abc123');
+  });
+
+  it('DM keys by channel (continuity) even with a rootId', () => {
+    expect(mattermostContextKey('dm1', { channelType: 'D', rootId: 'root9' })).toBe(
+      'mattermost:channel:dm1'
+    );
+  });
+
+  it('channel keys by thread root (parallel + isolated sessions)', () => {
+    expect(mattermostContextKey('ch1', { channelType: 'O', rootId: 'rootA' })).toBe(
+      'mattermost:thread:ch1:rootA'
+    );
+    // 別スレッドは別 contextKey → 別キュー → 並列
+    expect(mattermostContextKey('ch1', { channelType: 'O', rootId: 'rootB' })).not.toBe(
+      mattermostContextKey('ch1', { channelType: 'O', rootId: 'rootA' })
+    );
+  });
+
+  it('falls back to channel key when rootId is missing', () => {
+    expect(mattermostContextKey('ch1', { channelType: 'O' })).toBe('mattermost:channel:ch1');
   });
 });
 

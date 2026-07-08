@@ -65,9 +65,21 @@ export function redactMattermostSecrets(text: string, token?: string): string {
   return text.split(token).join('***');
 }
 
-/** contextKey: Mattermost は DM も含めてチャンネル単位で会話を持つ。 */
-export function mattermostContextKey(channelId: string): string {
-  return `mattermost:channel:${channelId}`;
+/**
+ * contextKey を決める。会話の直列/並列とセッション（メモリ）の境界がこれで決まる。
+ * - DM: チャンネル単位（トップレベル発言でも 1 会話として継続する）。
+ * - チャンネル: スレッド(root_id)単位。別スレッドは別 contextKey になり、
+ *   キューが分かれる＝**並列実行**され、セッション（会話メモリ）も独立する。
+ *   トップレベル発言は自分の post.id を root にした新スレッド扱い。
+ */
+export function mattermostContextKey(
+  channelId: string,
+  opts?: { channelType?: string; rootId?: string }
+): string {
+  if (opts?.channelType === 'D' || !opts?.rootId) {
+    return `mattermost:channel:${channelId}`;
+  }
+  return `mattermost:thread:${channelId}:${opts.rootId}`;
 }
 
 /** `wss://.../api/v4/websocket` を得る。Client4.getWebSocketUrl は http(s) スキームで返すため変換する。 */
@@ -275,7 +287,10 @@ export async function startMattermostBot(opts: {
     }
 
     const channelId = post.channel_id;
-    const contextKey = mattermostContextKey(channelId);
+    // スレッド内発言はそのスレッドに、トップレベルは発言 post を root にして返信する。
+    // この rootId が contextKey（＝直列/並列・セッション境界）を決める。
+    const rootId = post.root_id || post.id;
+    const contextKey = mattermostContextKey(channelId, { channelType, rootId });
     const isBot = (post.props?.from_bot === 'true' || post.props?.from_bot === true) ?? false;
     const rawText = (post.message ?? '').trim();
 
@@ -297,8 +312,6 @@ export async function startMattermostBot(opts: {
 
     const mentioned = hasBotMention(rawText, botUsername);
     const cleanText = mentioned ? stripBotMention(rawText, botUsername) : rawText;
-    // スレッド内発言はそのスレッドに、トップレベルは発言 post にぶら下げて返信する
-    const rootId = post.root_id || post.id;
 
     // リセットコマンド
     if (isResetCommand(cleanText, resetPatterns)) {
